@@ -22,7 +22,7 @@ namespace Repository
             var employees = await FindByCondition(e => e.CompanyId.Equals(companyId) && (e.Age >= employeeParameters.MinAge && e.Age <= employeeParameters.MaxAge), trackChanges)
               .FilterEmployees(employeeParameters.MinAge, employeeParameters.MaxAge)
               .Search(employeeParameters.SearchTerm)
-              .OrderBy(e => e.Name)
+              .Sort(employeeParameters.OrderBy)
               .Skip((employeeParameters.PageNumber - 1) * employeeParameters.PageSize)
               .Take(employeeParameters.PageSize)
               .ToListAsync();
@@ -33,8 +33,7 @@ namespace Repository
         }
 
         public async Task<Employee> GetEmployeeAsync(Guid companyId, Guid id, bool trackChanges) =>
-            await FindByCondition(e => e.CompanyId.Equals(companyId) && e.Id.Equals(id), trackChanges)
-            .SingleOrDefaultAsync();
+            await FindByCondition(e => e.CompanyId.Equals(companyId) && e.Id.Equals(id), trackChanges).SingleOrDefaultAsync();
 
         public void CreateEmployeeForCompany(Guid companyId, Employee employee)
         {
