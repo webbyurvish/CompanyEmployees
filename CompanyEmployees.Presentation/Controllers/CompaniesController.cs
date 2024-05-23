@@ -1,5 +1,7 @@
-﻿using CompanyEmployees.Presentation.ModelBinders;
+﻿using Asp.Versioning;
+using CompanyEmployees.Presentation.ModelBinders;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Presentation.ActionFilters;
 using Service.Contracts;
 using Shared.DataTransferObjects;
@@ -12,6 +14,9 @@ using System.Threading.Tasks;
 namespace CompanyEmployees.Presentation.Controllers
 {
     [Route("api/companies")]
+    [ResponseCache(CacheProfileName = "120SecondsDuration")]
+    //[OutputCache(PolicyName = "120SecondsDuration")] <- for named output caching
+    //[OutputCache(NoStore = true)] <- for not use caching but configured
     [ApiController]
     public class CompaniesController : ControllerBase
     {
@@ -22,7 +27,7 @@ namespace CompanyEmployees.Presentation.Controllers
             _service = service;
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetCompanies")]
         public async Task<IActionResult> GetCompanies()
         {
             var companies = await _service.CompanyService.GetAllCompaniesAsync(trackChanges : false);
@@ -31,6 +36,8 @@ namespace CompanyEmployees.Presentation.Controllers
         }
 
         [HttpGet("{id:guid}", Name = "CompanyById")]
+        [ResponseCache(Duration = 60)]
+        //[OutputCache(Duration = 60)]
         public async Task<IActionResult> GetCompany(Guid id)
         {
             var company = await _service.CompanyService.GetCompanyAsync(id, trackChanges: false);
@@ -38,7 +45,7 @@ namespace CompanyEmployees.Presentation.Controllers
             return Ok(company);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateCompany")]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateCompany([FromBody] CompanyForCreationDto company)
         {
@@ -78,6 +85,13 @@ namespace CompanyEmployees.Presentation.Controllers
             await _service.CompanyService.UpdateCompanyAsync(id, company, trackChanges: true);
 
             return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetCompaniesOptions()
+        {
+            Response.Headers.Add("Allow", "GET, OPTIONS, POST, PUT, DELETE");
+            return Ok();
         }
     }
 }

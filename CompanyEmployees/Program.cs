@@ -7,6 +7,7 @@
 
 using CompanyEmployees;
 using CompanyEmployees.Extensions;
+using CompanyEmployees.Utility;
 using Contracts;
 using Entities.Models;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -47,9 +48,17 @@ builder.Services.AddControllers(config =>
     config.RespectBrowserAcceptHeader = true;
     config.ReturnHttpNotAcceptable = true;
     config.InputFormatters.Insert(0,GetJsonPatchInputFormatter());
+    config.CacheProfiles.Add("120SecondsDuration", new CacheProfile { Duration = 120 });
 }).AddXmlDataContractSerializerFormatters()
 .AddCustomCSVFormatter()
 .AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
+
+builder.Services.AddCustomMediaTypes();
+builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
+builder.Services.AddScoped<ValidateMediaTypeAttribute>();
+builder.Services.ConfigureVersioning();
+builder.Services.ConfigureResponseCaching();
+//builder.Services.ConfigureOutputCaching();
 
 var app = builder.Build();
 
@@ -70,6 +79,8 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 });
 
 app.UseCors("CorsPolicy");
+app.UseResponseCaching();
+//app.UseOutputCache();
 
 app.UseAuthorization();
 
