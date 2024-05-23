@@ -55,6 +55,7 @@ builder.Services.AddControllers(config =>
 builder.Services.AddCustomMediaTypes();
 builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
 builder.Services.AddScoped<ValidateMediaTypeAttribute>();
+builder.Services.ConfigureVersioning();
 
 var app = builder.Build();
 
