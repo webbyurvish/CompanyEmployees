@@ -7,6 +7,7 @@
 
 using CompanyEmployees;
 using CompanyEmployees.Extensions;
+using CompanyEmployees.Utility;
 using Contracts;
 using Entities.Models;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -50,6 +51,10 @@ builder.Services.AddControllers(config =>
 }).AddXmlDataContractSerializerFormatters()
 .AddCustomCSVFormatter()
 .AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
+
+builder.Services.AddCustomMediaTypes();
+builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
+builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 
 var app = builder.Build();
 
