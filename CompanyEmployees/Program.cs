@@ -58,6 +58,7 @@ builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
 builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 builder.Services.ConfigureVersioning();
 builder.Services.ConfigureResponseCaching();
+//builder.Services.ConfigureOutputCaching();
 
 var app = builder.Build();
 
@@ -79,6 +80,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseCors("CorsPolicy");
 app.UseResponseCaching();
+//app.UseOutputCache();
 
 app.UseAuthorization();
 

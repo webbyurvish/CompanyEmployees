@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using CompanyEmployees.Presentation.ModelBinders;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Presentation.ActionFilters;
 using Service.Contracts;
 using Shared.DataTransferObjects;
@@ -14,6 +15,8 @@ namespace CompanyEmployees.Presentation.Controllers
 {
     [Route("api/companies")]
     [ResponseCache(CacheProfileName = "120SecondsDuration")]
+    //[OutputCache(PolicyName = "120SecondsDuration")] <- for named output caching
+    //[OutputCache(NoStore = true)] <- for not use caching but configured
     [ApiController]
     public class CompaniesController : ControllerBase
     {
@@ -34,6 +37,7 @@ namespace CompanyEmployees.Presentation.Controllers
 
         [HttpGet("{id:guid}", Name = "CompanyById")]
         [ResponseCache(Duration = 60)]
+        //[OutputCache(Duration = 60)]
         public async Task<IActionResult> GetCompany(Guid id)
         {
             var company = await _service.CompanyService.GetCompanyAsync(id, trackChanges: false);
