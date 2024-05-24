@@ -59,6 +59,11 @@ builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 builder.Services.ConfigureVersioning();
 builder.Services.ConfigureResponseCaching();
 //builder.Services.ConfigureOutputCaching();
+builder.Services.ConfigureRateLimitingOptions();
+builder.Services.AddAuthentication();
+builder.Services.ConfigureIdentity();
+builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.ConfigureSwagger();
 
 var app = builder.Build();
 
@@ -78,10 +83,19 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.All
 });
 
+app.UseSwagger();
+app.UseSwaggerUI(s =>
+{
+    s.SwaggerEndpoint("/swagger/v1/swagger.json", "Code Maze API v1");
+    s.SwaggerEndpoint("/swagger/v2/swagger.json", "Code Maze API v2");
+});
+
+app.UseRateLimiter();
 app.UseCors("CorsPolicy");
 app.UseResponseCaching();
 //app.UseOutputCache();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

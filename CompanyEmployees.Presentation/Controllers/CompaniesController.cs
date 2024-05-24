@@ -1,7 +1,9 @@
 ﻿using Asp.Versioning;
 using CompanyEmployees.Presentation.ModelBinders;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.AspNetCore.RateLimiting;
 using Presentation.ActionFilters;
 using Service.Contracts;
 using Shared.DataTransferObjects;
@@ -18,6 +20,7 @@ namespace CompanyEmployees.Presentation.Controllers
     //[OutputCache(PolicyName = "120SecondsDuration")] <- for named output caching
     //[OutputCache(NoStore = true)] <- for not use caching but configured
     [ApiController]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class CompaniesController : ControllerBase
     {
         private readonly IServiceManager _service;
@@ -27,7 +30,13 @@ namespace CompanyEmployees.Presentation.Controllers
             _service = service;
         }
 
+        /// <summary>
+        /// Gets the list of all companies
+        /// </summary>
+        /// <returns>The companies list</returns>
         [HttpGet(Name = "GetCompanies")]
+        [Authorize(Roles = "Manager")]
+        [EnableRateLimiting("SpecificPolicy")]
         public async Task<IActionResult> GetCompanies()
         {
             var companies = await _service.CompanyService.GetAllCompaniesAsync(trackChanges : false);
@@ -38,6 +47,7 @@ namespace CompanyEmployees.Presentation.Controllers
         [HttpGet("{id:guid}", Name = "CompanyById")]
         [ResponseCache(Duration = 60)]
         //[OutputCache(Duration = 60)]
+        [DisableRateLimiting]
         public async Task<IActionResult> GetCompany(Guid id)
         {
             var company = await _service.CompanyService.GetCompanyAsync(id, trackChanges: false);
@@ -45,8 +55,19 @@ namespace CompanyEmployees.Presentation.Controllers
             return Ok(company);
         }
 
+        /// <summary>
+        /// Creates a newly created company
+        /// </summary>
+        /// <param name="company"></param>
+        /// <returns>A newly created company</returns>
+        /// <response code="201">Returns the newly created item</response>
+        /// <response code="400">If the item is null</response>
+        /// <response code="422">If the model is invalid</response>
         [HttpPost(Name = "CreateCompany")]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
         public async Task<IActionResult> CreateCompany([FromBody] CompanyForCreationDto company)
         {
             var createdCompany = await _service.CompanyService.CreateCompanyAsync(company);
