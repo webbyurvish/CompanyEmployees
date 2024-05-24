@@ -59,6 +59,7 @@ builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 builder.Services.ConfigureVersioning();
 builder.Services.ConfigureResponseCaching();
 //builder.Services.ConfigureOutputCaching();
+builder.Services.ConfigureRateLimitingOptions();
 
 var app = builder.Build();
 
@@ -78,6 +79,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.All
 });
 
+app.UseRateLimiter();
 app.UseCors("CorsPolicy");
 app.UseResponseCaching();
 //app.UseOutputCache();
