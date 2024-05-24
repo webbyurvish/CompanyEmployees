@@ -60,6 +60,9 @@ builder.Services.ConfigureVersioning();
 builder.Services.ConfigureResponseCaching();
 //builder.Services.ConfigureOutputCaching();
 builder.Services.ConfigureRateLimitingOptions();
+builder.Services.AddAuthentication();
+builder.Services.ConfigureIdentity();
+builder.Services.ConfigureJWT(builder.Configuration);
 
 var app = builder.Build();
 
@@ -84,6 +87,7 @@ app.UseCors("CorsPolicy");
 app.UseResponseCaching();
 //app.UseOutputCache();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
